@@ -37,14 +37,14 @@ for (var i = 0; i < data.length; i++) {
 }
 
 render(document.body, <ul>
-  data.map(item => <Li i={ i }></Li>);
+  { data.map(item => <Li i={ i }></Li>) }
 </ul>);
 
 setTimeout(function () {
   data.sort(() => Math.random() - 0.5);
 
   render(document.body, <ul>
-    data.map(item => <Li i={ i }></Li>);
+    { data.map(item => <Li i={ i }></Li>) }
   </ul>);
 }, 1000);
 ```
