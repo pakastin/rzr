@@ -1,0 +1,21 @@
+{
+  "name": "rzr",
+  "version": "0.0.1",
+  "description": "Turboboosted 2 KB virtual dom view library for browser & node.js",
+  "main": "dist/rzr.js",
+  "scripts": {
+    "dev": "node watch",
+    "build": "rollup -c -n rzr -f umd src/index.js -o dist/rzr.js",
+    "uglify": "uglifyjs dist/rzr.js -cmo dist/rzr.min.js",
+    "test": "rollup -c -f cjs src/index.js -o test/rzr.js && tape test"
+  },
+  "author": "Juha Lindstedt",
+  "license": "ISC",
+  "devDependencies": {
+    "@pakastin/watch": "0.0.1",
+    "rollup": "~0.33.0",
+    "rollup-plugin-buble": "~0.12.1",
+    "uglifyjs": "~2.4.10"
+  },
+  "dependencies": {}
+}
