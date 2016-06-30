@@ -2,7 +2,7 @@
 Turboboosted 2 KB virtual dom view library for browser &amp; node.js
 
 ## Installation
-This is an early beta, for now install straight from Github:
+This is an early beta. For now install straight from Github:
 ```js
 npm install pakastin/rzr
 ```
