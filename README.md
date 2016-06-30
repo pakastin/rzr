@@ -11,7 +11,7 @@ import { el, render } from 'rzr';
 
 class Li {
   render(data, ...children) {
-    return <li class="item">{ data.i }</li>
+    return <li class="item" onclick={ this.onClick.bind(this) }>{ data.i }</li>
   }
   init(data, ...children) {
     console.log('created');
@@ -24,6 +24,9 @@ class Li {
   }
   unmount() {
     console.log('unmounted');
+  }
+  onClick() {
+    console.log(this);
   }
 }
 
