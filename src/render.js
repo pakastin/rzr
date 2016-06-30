@@ -14,7 +14,7 @@ export var render = (parent, el, pos) => {
       var oldComponent = oldEl.component;
       var oldComponentClass = oldEl.componentClass;
 
-      oldComponent.update(attrs, ...children);
+      oldComponent.update && oldComponent.update(attrs, ...children);
 
       el = oldComponent.render(attrs, ...children);
       el.component = oldComponent;

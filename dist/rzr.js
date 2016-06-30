@@ -62,7 +62,7 @@
         var oldComponent = oldEl.component;
         var oldComponentClass = oldEl.componentClass;
 
-        oldComponent.update.apply(oldComponent, [ attrs ].concat( children ));
+        oldComponent.update && oldComponent.update.apply(oldComponent, [ attrs ].concat( children ));
 
         el = oldComponent.render.apply(oldComponent, [ attrs ].concat( children ));
         el.component = oldComponent;
