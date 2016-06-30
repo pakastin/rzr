@@ -48,3 +48,7 @@ setTimeout(function () {
   </ul>);
 }, 1000);
 ```
+
+## State
+
+You can save state to component´s `this`.
