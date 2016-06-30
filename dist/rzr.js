@@ -4,10 +4,7 @@
   (factory((global.rzr = global.rzr || {})));
 }(this, function (exports) { 'use strict';
 
-  var el = function (tagName, attrs) {
-    var children = [], len = arguments.length - 2;
-    while ( len-- > 0 ) children[ len ] = arguments[ len + 2 ];
-
+  var el = function (tagName, attrs, children) {
     for (var key in attrs) {
       if (key === 'style') {
         var value = attrs.style;
@@ -90,7 +87,6 @@
       for (var i = 0; i < el.length; i++) {
         render(parent, el[i], pos++);
       }
-      return
     } else if (el instanceof Node) {
       if (oldNode) {
         parent.insertBefore(newNode, oldNode);
@@ -137,6 +133,8 @@
 
       while (traverse) {
         var next = traverse.nextSibling;
+        var el = traverse.el;
+        var component = el && el.component;
 
         component && component.unmount && component.unmount();
         notifyUnmount(traverse);
@@ -193,15 +191,17 @@
 
     var children = el.children;
 
-    for (var i = 0; i < children.length; i++) {
-      var child = children[i];
+    if (typeof children === 'string' || typeof children === 'number') {
+      node.textContent = children;
+    } else if (children) {
+      for (var i = 0; i < children.length; i++) {
+        var child = children[i];
 
-      if (child instanceof Node) {
-        node.appendChild(child);
-      } else if (typeof child === 'string' || typeof child === 'number') {
-        node.appendChild(document.createTextNode(child));
-      } else {
-        render(node, child, i);
+        if (child instanceof Node) {
+          node.appendChild(child);
+        } else {
+          render(node, child, i);
+        }
       }
     }
 
@@ -300,7 +300,13 @@
       }
     }
 
-    render(node, children);
+    if (typeof children === 'string' || typeof children === 'number') {
+      node.textContent = children;
+    } else if (children) {
+      render(node, children);
+    } else {
+      render(node, []);
+    }
   }
 
   var diffSVG$1 = function (parent, node, el) {

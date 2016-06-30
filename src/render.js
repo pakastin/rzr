@@ -39,7 +39,6 @@ export var render = (parent, el, pos) => {
     for (var i = 0; i < el.length; i++) {
       render(parent, el[i], pos++);
     }
-    return
   } else if (el instanceof Node) {
     if (oldNode) {
       parent.insertBefore(newNode, oldNode);
@@ -86,6 +85,8 @@ export var render = (parent, el, pos) => {
 
     while (traverse) {
       var next = traverse.nextSibling;
+      var el = traverse.el;
+      var component = el && el.component;
 
       component && component.unmount && component.unmount();
       notifyUnmount(traverse);

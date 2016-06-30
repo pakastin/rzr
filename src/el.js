@@ -1,5 +1,5 @@
 
-export var el = (tagName, attrs, ...children) => {
+export var el = (tagName, attrs, children) => {
   for (var key in attrs) {
     if (key === 'style') {
       var value = attrs.style;

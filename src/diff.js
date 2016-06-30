@@ -46,7 +46,13 @@ export var diff = (parent, node, el) => {
     }
   }
 
-  render(node, children);
+  if (typeof children === 'string' || typeof children === 'number') {
+    node.textContent = children;
+  } else if (children) {
+    render(node, children);
+  } else {
+    render(node, []);
+  }
 }
 
 export var diffSVG = (parent, node, el) => {

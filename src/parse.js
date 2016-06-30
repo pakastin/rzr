@@ -32,15 +32,17 @@ export var parse = (el) => {
 
   var children = el.children;
 
-  for (var i = 0; i < children.length; i++) {
-    var child = children[i];
+  if (typeof children === 'string' || typeof children === 'number') {
+    node.textContent = children;
+  } else if (children) {
+    for (var i = 0; i < children.length; i++) {
+      var child = children[i];
 
-    if (child instanceof Node) {
-      node.appendChild(child);
-    } else if (typeof child === 'string' || typeof child === 'number') {
-      node.appendChild(document.createTextNode(child));
-    } else {
-      render(node, child, i);
+      if (child instanceof Node) {
+        node.appendChild(child);
+      } else {
+        render(node, child, i);
+      }
     }
   }
 
