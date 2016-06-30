@@ -33,7 +33,7 @@ export var parse = (el) => {
 
   for (var i = 0; i < children.length; i++) {
     var child = children[i];
-    
+
     if (child instanceof Node) {
       node.appendChild(child);
     } else if (typeof child === 'string' || typeof child === 'number') {
@@ -46,7 +46,6 @@ export var parse = (el) => {
   return node;
 }
 
-
 export var parseSVG = (el) => {
   var node = document.createElementNS('http://www.w3.org/2000/svg', el.tagName);
 
@@ -57,7 +56,19 @@ export var parseSVG = (el) => {
   for (var key in attrs) {
     var value = attrs[key];
 
-    if (typeof value === 'function') {
+    if (typeof value === 'object') {
+      if (key === 'style') {
+        for (var key in value) {
+          node.style[key] = value[key];
+        }
+      } else if (key === 'class') {
+        for (var key in value) {
+          node.classList.add(key);
+        }
+      } else {
+        node[key] = value;
+      }
+    } else if (typeof value === 'function') {
       node[key] = value;
     } else {
       node.setAttribute(key, value);

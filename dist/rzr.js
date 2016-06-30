@@ -117,15 +117,26 @@
       var traverse = parent.childNodes[pos];
 
       while (traverse) {
-        var el = traverse.el;
-        var component = el && el.component;
-        var next = traverse.nextSibling;
+        component.unmount && component.unmount();
+        notifyUnmount(traverse);
         parent.removeChild(traverse);
-
-        component && component.unmount && component.unmount();
 
         traverse = next;
       }
+    }
+  }
+
+  function notifyUnmount (child) {
+    var traverse = child.firstChild;
+
+    while (traverse) {
+      var el = traverse.el;
+      var component = el && el.component;
+
+      component && component.unmount();
+      notifyUnmount(traverse);
+
+      traverse = next;
     }
   }
 
@@ -161,7 +172,7 @@
 
     for (var i = 0; i < children.length; i++) {
       var child = children[i];
-      
+
       if (child instanceof Node) {
         node.appendChild(child);
       } else if (typeof child === 'string' || typeof child === 'number') {
@@ -173,7 +184,6 @@
 
     return node;
   }
-
 
   var parseSVG = function (el) {
     var node = document.createElementNS('http://www.w3.org/2000/svg', el.tagName);
@@ -257,6 +267,54 @@
     render(node, children);
   }
 
+  var diffSVG$1 = function (parent, node, el) {
+    var oldEl = node && node.el;
+
+    var attrs = el.attrs;
+    var oldAttrs = oldEl.attrs;
+
+    var children = el.children;
+
+    for (var attr in attrs) {
+      var value = attrs[attr];
+      var oldValue = oldAttrs[attr];
+
+      if (value !== oldValue) {
+        if (typeof value === 'object') {
+          if (key === 'style') {
+            for (var key in value) {
+              node.style[key] = value[key];
+            }
+            for (var key in oldValue) {
+              if (value[key] == null) {
+                node.style[key] = '';
+              }
+            }
+          } else if (key === 'class') {
+            for (var key in value) {
+              if (value == true) {
+                node.classList.add(key);
+              }
+            }
+            for (var key in oldValue) {
+              if (value[key] == null) {
+                node.classList.remove(key);
+              }
+            }
+          } else {
+            node[key] = value;
+          }
+        } else if (key === 'style' || (value == null && typeof value != 'function')) {
+          node.setAttribute(key, value);
+        } else {
+          node[key] = value;
+        }
+      }
+    }
+
+    render(node, children);
+  }
+
   exports.el = el;
   exports.parseStyleString = parseStyleString;
   exports.parseClassString = parseClassString;
@@ -264,6 +322,7 @@
   exports.parse = parse;
   exports.parseSVG = parseSVG;
   exports.diff = diff;
+  exports.diffSVG = diffSVG$1;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

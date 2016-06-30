@@ -66,14 +66,25 @@ export var render = (parent, el, pos) => {
     var traverse = parent.childNodes[pos];
 
     while (traverse) {
-      var el = traverse.el;
-      var component = el && el.component;
-      var next = traverse.nextSibling;
+      component.unmount && component.unmount();
+      notifyUnmount(traverse);
       parent.removeChild(traverse);
-
-      component && component.unmount && component.unmount();
 
       traverse = next;
     }
+  }
+}
+
+function notifyUnmount (child) {
+  var traverse = child.firstChild;
+
+  while (traverse) {
+    var el = traverse.el;
+    var component = el && el.component;
+
+    component && component.unmount();
+    notifyUnmount(traverse);
+
+    traverse = next;
   }
 }
