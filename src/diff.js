@@ -49,13 +49,15 @@ export function diff (parent, node, el) {
   if (typeof children === 'string' || typeof children === 'number') {
     node.textContent = children;
   } else if (children) {
-    render(node, children);
+    for (var i = 0; i < children.length; i++) {
+      render(node, children[i], i);
+    }
   } else {
     render(node, []);
   }
 }
 
-export diffSVG function (parent, node, el) {
+export function diffSVG (parent, node, el) {
   var oldEl = node && node.el;
 
   var attrs = el.attrs;
@@ -100,5 +102,11 @@ export diffSVG function (parent, node, el) {
     }
   }
 
-  render(node, children);
+  if (typeof children === 'string' || typeof children === 'number') {
+    node.textContent = children;
+  } else if (children) {
+    render(node, children);
+  } else {
+    render(node, []);
+  }
 }

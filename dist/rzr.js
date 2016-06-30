@@ -4,15 +4,130 @@
   (factory((global.rzr = global.rzr || {})));
 }(this, function (exports) { 'use strict';
 
-  var el = function (tagName, attrs, children) {
+  function diff (parent, node, el) {
+    var oldEl = node && node.el;
+
+    var attrs = el.attrs;
+    var oldAttrs = oldEl.attrs;
+
+    var children = el.children;
+
+    for (var attr in attrs) {
+      var value = attrs[attr];
+      var oldValue = oldAttrs[attr];
+
+      if (value !== oldValue) {
+        if (typeof value === 'object') {
+          if (attr === 'style') {
+            for (var key in value) {
+              node.style[key] = value[key];
+            }
+            for (var key in oldValue) {
+              if (value[key] == null) {
+                node.style[key] = '';
+              }
+            }
+          } else if (attr === 'class') {
+            for (var key in value) {
+              if (value == true) {
+                node.classList.add(key);
+              }
+            }
+            for (var key in oldValue) {
+              if (value[key] == null) {
+                node.classList.remove(key);
+              }
+            }
+          } else {
+            node[attr] = value;
+          }
+        } else if (attr === 'style' || (node[attr] == null && typeof value != 'function')) {
+          node.setAttribute(attr, value);
+        } else {
+          node[attr] = value;
+        }
+      }
+    }
+
+    if (typeof children === 'string' || typeof children === 'number') {
+      node.textContent = children;
+    } else if (children) {
+      for (var i = 0; i < children.length; i++) {
+        render(node, children[i], i);
+      }
+    } else {
+      render(node, []);
+    }
+  }
+
+  function diffSVG$1 (parent, node, el) {
+    var oldEl = node && node.el;
+
+    var attrs = el.attrs;
+    var oldAttrs = oldEl.attrs;
+
+    var children = el.children;
+
+    for (var attr in attrs) {
+      var value = attrs[attr];
+      var oldValue = oldAttrs[attr];
+
+      if (value !== oldValue) {
+        if (typeof value === 'object') {
+          if (attr === 'style') {
+            for (var key in value) {
+              node.style[key] = value[key];
+            }
+            for (var key in oldValue) {
+              if (value[key] == null) {
+                node.style[key] = '';
+              }
+            }
+          } else if (attr === 'class') {
+            for (var key in value) {
+              if (value == true) {
+                node.classList.add(key);
+              }
+            }
+            for (var key in oldValue) {
+              if (value[key] == null) {
+                node.classList.remove(key);
+              }
+            }
+          } else {
+            node[attr] = value;
+          }
+        } else if (typeof value == 'function') {
+          node[attr] = value;
+        } else {
+          node.setAttribute(attr, value);
+        }
+      }
+    }
+
+    if (typeof children === 'string' || typeof children === 'number') {
+      node.textContent = children;
+    } else if (children) {
+      render(node, children);
+    } else {
+      render(node, []);
+    }
+  }
+
+  function el (tagName, attrs) {
+    var children = [], len = arguments.length - 2;
+    while ( len-- > 0 ) children[ len ] = arguments[ len + 2 ];
+
     for (var key in attrs) {
       if (key === 'style') {
         var value = attrs.style;
+
         if (typeof value === 'string') {
           attrs.style = parseStyleString(value);
         }
       } else if (key === 'class') {
         var value = attrs.class;
+
         if (typeof value === 'string') {
           attrs.class = parseClassString(value);
         }
@@ -26,19 +141,21 @@
     }
   }
 
-  var parseStyleString = function (styleString) {
+  function parseStyleString (styleString) {
     var split = styleString.split(';');
     var result = {};
 
     for (var i = 0; i < split.length; i++) {
       var part = split[i].split(':');
-      result[part[0]] = part[1];
+      var key = dashedToCamelCase(part[0].trim());
+
+      result[key] = part.slice(1).join(':').trim();
     }
 
     return result;
   }
 
-  var parseClassString = function (classString) {
+  function parseClassString (classString) {
     var split = classString.split(' ');
     var result = {};
 
@@ -49,118 +166,34 @@
     return result;
   }
 
-  var render = function (parent, el, pos) {
-    var originalPos = pos;
-    var pos = pos || 0;
-    var oldNode = parent.childNodes[pos];
-    var oldEl = oldNode && oldNode.el
+  function dashedToCamelCase (str) {
+    var result = [];
 
-    if (typeof el.tagName === 'function') {
-      if (oldEl && oldEl.componentClass && el.tagName === oldEl.componentClass) {
-        var attrs = el.attrs;
-        var children = el.children;
-        var oldComponent = oldEl.component;
-        var oldComponentClass = oldEl.componentClass;
-
-        oldComponent.update && oldComponent.update.apply(oldComponent, [ attrs ].concat( children ));
-
-        el = oldComponent.render.apply(oldComponent, [ attrs ].concat( children ));
-        el.component = oldComponent;
-        el.componentClass = oldComponentClass;
-
-        return render(parent, el, pos++);
-      } else {
-        var componentClass = el.tagName;
-        var component = new componentClass();
-        var attrs = el.attrs;
-        var children = el.children;
-
-        el = component.render.apply(component, [ attrs ].concat( children ));
-        el.component = component;
-        el.componentClass = componentClass;
-
-        component.isMounted = false;
-
-        return render(parent, el, pos++);
-      }
-    } else if (el instanceof Array) {
-      for (var i = 0; i < el.length; i++) {
-        render(parent, el[i], pos++);
-      }
-    } else if (el instanceof Node) {
-      if (oldNode) {
-        parent.insertBefore(newNode, oldNode);
-      } else {
-        parent.appendChild(newNode);
-      }
-      pos++;
-    } else if (typeof el === 'string' || typeof el === 'number') {
-      parent.textContent = el;
-      pos++;
-    } else {
-      var isSVG = (el.tagName === 'svg' || parent instanceof SVGElement);
-
-      if (oldEl && el.tagName === oldEl.tagName && el.componentClass === oldEl.componentClass) {
-        if (isSVG) {
-          diffSVG(parent, oldNode, el);
+    for (var i = 0; i < str.length; i++) {
+      if (str[i] === '-') {
+        if (i > 0) {
+          result[i++] = str[i].toUpperCase();
         } else {
-          diff(parent, oldNode, el);
+          result[i++] = str[i];
         }
       } else {
-        var newNode = isSVG ? parseSVG(el) : parse(el);
-        var el = newNode.el;
-        var component = el && el.component;
-
-        if (oldNode) {
-          parent.insertBefore(newNode, oldNode);
-        } else {
-          parent.appendChild(newNode);
-        }
-
-        if (component && !component.isMounted) {
-          component.dom = newNode;
-          component.init && component.init.apply(component, [ attrs ].concat( children ));
-          component.isMounted = true;
-        }
-
-        component && component.mount && component.mount();
-      }
-      pos++;
-    }
-
-    if (originalPos == null) {
-      var traverse = parent.childNodes[pos];
-
-      while (traverse) {
-        var next = traverse.nextSibling;
-        var el = traverse.el;
-        var component = el && el.component;
-
-        component && component.unmount && component.unmount();
-        notifyUnmount(traverse);
-        parent.removeChild(traverse);
-
-        traverse = next;
+        result[i] = str[i];
       }
     }
+    return result.join('');
   }
 
-  function notifyUnmount (child) {
-    var traverse = child.firstChild;
+  function list (Component, data) {
+    var results = new Array(data.length);
 
-    while (traverse) {
-      var next = traverse.nextSibling;
-      var el = traverse.el;
-      var component = el && el.component;
-
-      component && component.unmount();
-      notifyUnmount(traverse);
-
-      traverse = next;
+    for (var i = 0; i < results.length; i++) {
+      results[i] = el(Component, data[i]);
     }
+
+    return results;
   }
 
-  var parse = function (el) {
+  function parse (el) {
     var node = document.createElement(el.tagName);
     var attrs = el.attrs;
 
@@ -208,7 +241,7 @@
     return node;
   }
 
-  var parseSVG = function (el) {
+  function parseSVG (el) {
     var node = document.createElementNS('http://www.w3.org/2000/svg', el.tagName);
 
     node.el = el;
@@ -255,116 +288,129 @@
     return node;
   }
 
-  var diff = function (parent, node, el) {
-    var oldEl = node && node.el;
+  function render (parent, el, pos) {
+    var originalPos = pos;
+    var pos = pos || 0;
+    var oldNode = parent.childNodes[pos];
+    var oldEl = oldNode && oldNode.el
 
-    var attrs = el.attrs;
-    var oldAttrs = oldEl.attrs;
+    if (typeof el.tagName === 'function') {
+      if (oldEl && oldEl.componentClass && el.tagName === oldEl.componentClass) {
+        var attrs = el.attrs;
+        var children = el.children;
+        var oldComponent = oldEl.component;
+        var oldComponentClass = oldEl.componentClass;
 
-    var children = el.children;
+        oldComponent.update && oldComponent.update.apply(oldComponent, [ attrs ].concat( children ));
 
-    for (var attr in attrs) {
-      var value = attrs[attr];
-      var oldValue = oldAttrs[attr];
+        el = oldComponent.render.apply(oldComponent, [ attrs ].concat( children ));
+        el.component = oldComponent;
+        el.componentClass = oldComponentClass;
 
-      if (value !== oldValue) {
-        if (typeof value === 'object') {
-          if (key === 'style') {
-            for (var key in value) {
-              node.style[key] = value[key];
-            }
-            for (var key in oldValue) {
-              if (value[key] == null) {
-                node.style[key] = '';
-              }
-            }
-          } else if (key === 'class') {
-            for (var key in value) {
-              if (value == true) {
-                node.classList.add(key);
-              }
-            }
-            for (var key in oldValue) {
-              if (value[key] == null) {
-                node.classList.remove(key);
-              }
-            }
-          } else {
-            node[key] = value;
-          }
-        } else if (key === 'style' || (value == null && typeof value != 'function')) {
-          node.setAttribute(key, value);
-        } else {
-          node[key] = value;
-        }
+        return render(parent, el, pos);
+      } else {
+        var componentClass = el.tagName;
+        var component = new componentClass();
+        var attrs = el.attrs;
+        var children = el.children;
+
+        el = component.render.apply(component, [ attrs ].concat( children ));
+        el.component = component;
+        el.componentClass = componentClass;
+
+        component.isMounted = false;
+
+        return render(parent, el, pos);
       }
-    }
-
-    if (typeof children === 'string' || typeof children === 'number') {
-      node.textContent = children;
-    } else if (children) {
-      render(node, children);
+    } else if (el instanceof Array) {
+      for (var i = 0; i < el.length; i++) {
+        render(parent, el[i], pos++);
+      }
+    } else if (el instanceof Node) {
+      if (oldNode) {
+        parent.insertBefore(newNode, oldNode);
+      } else {
+        parent.appendChild(newNode);
+      }
+      pos++;
+    } else if (typeof el === 'string' || typeof el === 'number') {
+      parent.textContent = el;
+      pos++;
     } else {
-      render(node, []);
-    }
-  }
+      var isSVG = (el.tagName === 'svg' || parent instanceof SVGElement);
 
-  var diffSVG$1 = function (parent, node, el) {
-    var oldEl = node && node.el;
-
-    var attrs = el.attrs;
-    var oldAttrs = oldEl.attrs;
-
-    var children = el.children;
-
-    for (var attr in attrs) {
-      var value = attrs[attr];
-      var oldValue = oldAttrs[attr];
-
-      if (value !== oldValue) {
-        if (typeof value === 'object') {
-          if (key === 'style') {
-            for (var key in value) {
-              node.style[key] = value[key];
-            }
-            for (var key in oldValue) {
-              if (value[key] == null) {
-                node.style[key] = '';
-              }
-            }
-          } else if (key === 'class') {
-            for (var key in value) {
-              if (value == true) {
-                node.classList.add(key);
-              }
-            }
-            for (var key in oldValue) {
-              if (value[key] == null) {
-                node.classList.remove(key);
-              }
-            }
-          } else {
-            node[key] = value;
-          }
-        } else if (typeof value == 'function') {
-          node[key] = value;
+      if (oldEl && el.tagName === oldEl.tagName && el.componentClass === oldEl.componentClass) {
+        if (isSVG) {
+          diffSVG(parent, oldNode, el);
         } else {
-          node.setAttribute(key, value);
+          diff(parent, oldNode, el);
+        }
+      } else {
+        var newNode = isSVG ? parseSVG(el) : parse(el);
+        var el = newNode.el;
+        var component = el && el.component;
+
+        if (oldNode) {
+          parent.insertBefore(newNode, oldNode);
+        } else {
+          parent.appendChild(newNode);
+        }
+
+        if (component && !component.isMounted) {
+          component.dom = newNode;
+          component.init && component.init.apply(component, [ attrs ].concat( children ));
+          component.isMounted = true;
+
+          if (originalPos == null) {
+            component && component.mount && component.mount();
+            notifyDown(traverse, 'mount');
+          }
         }
       }
+      pos++;
     }
 
-    render(node, children);
+    if (originalPos == null) {
+      var traverse = parent.childNodes[pos];
+
+      while (traverse) {
+        var next = traverse.nextSibling;
+        var el = traverse.el;
+        var component = el && el.component;
+
+        component && component.unmount && component.unmount();
+        notifyDown(traverse, 'unmount');
+        parent.removeChild(traverse);
+
+        traverse = next;
+      }
+    }
   }
 
+  function notifyDown (child, eventName) {
+    var traverse = child.firstChild;
+
+    while (traverse) {
+      var next = traverse.nextSibling;
+      var el = traverse.el;
+      var component = el && el.component;
+
+      component && component[eventName]();
+      notifyDown(traverse, eventName);
+
+      traverse = next;
+    }
+  }
+
+  exports.diff = diff;
+  exports.diffSVG = diffSVG$1;
   exports.el = el;
   exports.parseStyleString = parseStyleString;
   exports.parseClassString = parseClassString;
-  exports.render = render;
+  exports.list = list;
   exports.parse = parse;
   exports.parseSVG = parseSVG;
-  exports.diff = diff;
-  exports.diffSVG = diffSVG$1;
+  exports.render = render;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

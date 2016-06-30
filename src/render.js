@@ -20,7 +20,7 @@ export function render (parent, el, pos) {
       el.component = oldComponent;
       el.componentClass = oldComponentClass;
 
-      return render(parent, el, pos++);
+      return render(parent, el, pos);
     } else {
       var componentClass = el.tagName;
       var component = new componentClass();
@@ -33,7 +33,7 @@ export function render (parent, el, pos) {
 
       component.isMounted = false;
 
-      return render(parent, el, pos++);
+      return render(parent, el, pos);
     }
   } else if (el instanceof Array) {
     for (var i = 0; i < el.length; i++) {
@@ -73,9 +73,12 @@ export function render (parent, el, pos) {
         component.dom = newNode;
         component.init && component.init(attrs, ...children);
         component.isMounted = true;
-      }
 
-      component && component.mount && component.mount();
+        if (originalPos == null) {
+          component && component.mount && component.mount();
+          notifyDown(traverse, 'mount');
+        }
+      }
     }
     pos++;
   }
@@ -89,7 +92,7 @@ export function render (parent, el, pos) {
       var component = el && el.component;
 
       component && component.unmount && component.unmount();
-      notifyUnmount(traverse);
+      notifyDown(traverse, 'unmount');
       parent.removeChild(traverse);
 
       traverse = next;
@@ -97,7 +100,7 @@ export function render (parent, el, pos) {
   }
 }
 
-function notifyUnmount (child) {
+function notifyDown (child, eventName) {
   var traverse = child.firstChild;
 
   while (traverse) {
@@ -105,8 +108,8 @@ function notifyUnmount (child) {
     var el = traverse.el;
     var component = el && el.component;
 
-    component && component.unmount();
-    notifyUnmount(traverse);
+    component && component[eventName]();
+    notifyDown(traverse, eventName);
 
     traverse = next;
   }

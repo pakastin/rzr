@@ -1,5 +1,5 @@
 
-export function el (tagName, attrs, children) {
+export function el (tagName, attrs, ...children) {
   for (var key in attrs) {
     if (key === 'style') {
       var value = attrs.style;
@@ -29,7 +29,9 @@ export function parseStyleString (styleString) {
 
   for (var i = 0; i < split.length; i++) {
     var part = split[i].split(':');
-    result[part[0]] = part[1];
+    var key = dashedToCamelCase(part[0].trim());
+
+    result[key] = part.slice(1).join(':').trim();
   }
 
   return result;
@@ -44,4 +46,21 @@ export function parseClassString (classString) {
   }
 
   return result;
+}
+
+function dashedToCamelCase (str) {
+  var result = [];
+
+  for (var i = 0; i < str.length; i++) {
+    if (str[i] === '-') {
+      if (i > 0) {
+        result[i++] = str[i].toUpperCase();
+      } else {
+        result[i++] = str[i];
+      }
+    } else {
+      result[i] = str[i];
+    }
+  }
+  return result.join('');
 }
