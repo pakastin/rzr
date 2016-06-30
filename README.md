@@ -23,16 +23,16 @@ class Li {
     return <li class="item" onclick={ this.onClick.bind(this) }>{ data.i }</li>
   }
   init(data, ...children) {
-    console.log('created');
+    console.log('created', this.dom);
   }
   update(data, ...children) {
-    console.log('updated');
+    console.log('updated', this.dom);
   }
   mount() {
-    console.log('mounted');
+    console.log('mounted', this.dom);
   }
   unmount() {
-    console.log('unmounted');
+    console.log('unmounted', this.dom);
   }
   onClick() {
     console.log(this);
