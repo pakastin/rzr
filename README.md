@@ -51,4 +51,4 @@ setTimeout(function () {
 
 ## State
 
-You can save state to component´s `this`.
+You can save state to components' `this`.
