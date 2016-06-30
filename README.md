@@ -41,7 +41,7 @@ render(document.body, <ul>
 </ul>);
 
 setTimeout(function () {
-  data.sort(() => Math.random() - 0.5;
+  data.sort(() => Math.random() - 0.5);
 
   render(document.body, <ul>
     data.map(item => <Li i={ i }></Li>);
