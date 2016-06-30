@@ -6,6 +6,7 @@ export var parse = (el) => {
   var attrs = el.attrs;
 
   node.el = el;
+  el.dom = node;
 
   for (var key in attrs) {
     var value = attrs[key];
@@ -50,6 +51,7 @@ export var parseSVG = (el) => {
   var node = document.createElementNS('http://www.w3.org/2000/svg', el.tagName);
 
   node.el = el;
+  el.dom = node;
 
   var attrs = el.attrs;
 

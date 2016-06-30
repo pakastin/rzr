@@ -81,7 +81,7 @@
         el.component = component;
         el.componentClass = componentClass;
 
-        component.init && component.init.apply(component, [ attrs ].concat( children ));
+        component.isMounted = false;
 
         render(parent, el, pos++);
       }
@@ -117,6 +117,12 @@
           parent.appendChild(newNode);
         }
 
+        if (component && component.isMounted) {
+          component.dom = newNode;
+          component.init && component.init.apply(component, [ attrs ].concat( children ));
+          component.isMounted = true;
+        }
+
         component && component.mount && component.mount();
       }
     }
@@ -125,7 +131,7 @@
       var traverse = parent.childNodes[pos];
 
       while (traverse) {
-        component.unmount && component.unmount();
+        component && component.unmount && component.unmount();
         notifyUnmount(traverse);
         parent.removeChild(traverse);
 
@@ -153,6 +159,7 @@
     var attrs = el.attrs;
 
     node.el = el;
+    el.dom = node;
 
     for (var key in attrs) {
       var value = attrs[key];
@@ -197,6 +204,7 @@
     var node = document.createElementNS('http://www.w3.org/2000/svg', el.tagName);
 
     node.el = el;
+    el.dom = node;
 
     var attrs = el.attrs;
 

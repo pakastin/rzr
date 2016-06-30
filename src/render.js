@@ -30,7 +30,7 @@ export var render = (parent, el, pos) => {
       el.component = component;
       el.componentClass = componentClass;
 
-      component.init && component.init(attrs, ...children);
+      component.isMounted = false;
 
       render(parent, el, pos++);
     }
@@ -66,6 +66,12 @@ export var render = (parent, el, pos) => {
         parent.appendChild(newNode);
       }
 
+      if (component && component.isMounted) {
+        component.dom = newNode;
+        component.init && component.init(attrs, ...children);
+        component.isMounted = true;
+      }
+
       component && component.mount && component.mount();
     }
   }
@@ -74,7 +80,7 @@ export var render = (parent, el, pos) => {
     var traverse = parent.childNodes[pos];
 
     while (traverse) {
-      component.unmount && component.unmount();
+      component && component.unmount && component.unmount();
       notifyUnmount(traverse);
       parent.removeChild(traverse);
 
