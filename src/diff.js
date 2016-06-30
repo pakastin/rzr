@@ -15,7 +15,7 @@ export var diff = (parent, node, el) => {
 
     if (value !== oldValue) {
       if (typeof value === 'object') {
-        if (key === 'style') {
+        if (attr === 'style') {
           for (var key in value) {
             node.style[key] = value[key];
           }
@@ -24,7 +24,7 @@ export var diff = (parent, node, el) => {
               node.style[key] = '';
             }
           }
-        } else if (key === 'class') {
+        } else if (attr === 'class') {
           for (var key in value) {
             if (value == true) {
               node.classList.add(key);
@@ -36,12 +36,12 @@ export var diff = (parent, node, el) => {
             }
           }
         } else {
-          node[key] = value;
+          node[attr] = value;
         }
-      } else if (key === 'style' || (value == null && typeof value != 'function')) {
-        node.setAttribute(key, value);
+      } else if (attr === 'style' || (node[attr] == null && typeof value != 'function')) {
+        node.setAttribute(attr, value);
       } else {
-        node[key] = value;
+        node[attr] = value;
       }
     }
   }
@@ -69,7 +69,7 @@ export var diffSVG = (parent, node, el) => {
 
     if (value !== oldValue) {
       if (typeof value === 'object') {
-        if (key === 'style') {
+        if (attr === 'style') {
           for (var key in value) {
             node.style[key] = value[key];
           }
@@ -78,7 +78,7 @@ export var diffSVG = (parent, node, el) => {
               node.style[key] = '';
             }
           }
-        } else if (key === 'class') {
+        } else if (attr === 'class') {
           for (var key in value) {
             if (value == true) {
               node.classList.add(key);
@@ -90,12 +90,12 @@ export var diffSVG = (parent, node, el) => {
             }
           }
         } else {
-          node[key] = value;
+          node[attr] = value;
         }
       } else if (typeof value == 'function') {
-        node[key] = value;
+        node[attr] = value;
       } else {
-        node.setAttribute(key, value);
+        node.setAttribute(attr, value);
       }
     }
   }
