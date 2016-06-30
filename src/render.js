@@ -14,6 +14,8 @@ export var render = (parent, el, pos) => {
       var oldComponent = oldEl.component;
       var oldComponentClass = oldEl.componentClass;
 
+      oldComponent.update(attrs, ...children);
+
       el = oldComponent.render(attrs, ...children);
       el.component = oldComponent;
       el.componentClass = oldComponentClass;
@@ -35,6 +37,12 @@ export var render = (parent, el, pos) => {
   } else if (el instanceof Array) {
     for (var i = 0; i < el.length; i++) {
       render(parent, el[i], pos++);
+    }
+  } else if (el instanceof Node) {
+    if (oldNode) {
+      parent.insertBefore(newNode, oldNode);
+    } else {
+      parent.appendChild(newNode);
     }
   } else if (typeof el === 'string' || typeof el === 'number') {
     parent.textContent = el;

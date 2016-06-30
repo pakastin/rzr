@@ -65,6 +65,8 @@
         var oldComponent = oldEl.component;
         var oldComponentClass = oldEl.componentClass;
 
+        oldComponent.update.apply(oldComponent, [ attrs ].concat( children ));
+
         el = oldComponent.render.apply(oldComponent, [ attrs ].concat( children ));
         el.component = oldComponent;
         el.componentClass = oldComponentClass;
@@ -86,6 +88,12 @@
     } else if (el instanceof Array) {
       for (var i = 0; i < el.length; i++) {
         render(parent, el[i], pos++);
+      }
+    } else if (el instanceof Node) {
+      if (oldNode) {
+        parent.insertBefore(newNode, oldNode);
+      } else {
+        parent.appendChild(newNode);
       }
     } else if (typeof el === 'string' || typeof el === 'number') {
       parent.textContent = el;
