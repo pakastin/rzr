@@ -54,7 +54,7 @@
 
   var render = function (parent, el, pos) {
     var originalPos = pos;
-    pos = pos || 0;
+    var pos = pos || 0;
     var oldNode = parent.childNodes[pos];
     var oldEl = oldNode && oldNode.el
 
@@ -70,7 +70,8 @@
         el = oldComponent.render.apply(oldComponent, [ attrs ].concat( children ));
         el.component = oldComponent;
         el.componentClass = oldComponentClass;
-        render(parent, el, pos++);
+
+        return render(parent, el, pos++);
       } else {
         var componentClass = el.tagName;
         var component = new componentClass();
@@ -83,20 +84,23 @@
 
         component.isMounted = false;
 
-        render(parent, el, pos++);
+        return render(parent, el, pos++);
       }
     } else if (el instanceof Array) {
       for (var i = 0; i < el.length; i++) {
         render(parent, el[i], pos++);
       }
+      return
     } else if (el instanceof Node) {
       if (oldNode) {
         parent.insertBefore(newNode, oldNode);
       } else {
         parent.appendChild(newNode);
       }
+      pos++;
     } else if (typeof el === 'string' || typeof el === 'number') {
       parent.textContent = el;
+      pos++;
     } else {
       var isSVG = (el.tagName === 'svg' || parent instanceof SVGElement);
 
@@ -117,7 +121,7 @@
           parent.appendChild(newNode);
         }
 
-        if (component && component.isMounted) {
+        if (component && !component.isMounted) {
           component.dom = newNode;
           component.init && component.init.apply(component, [ attrs ].concat( children ));
           component.isMounted = true;
@@ -125,12 +129,15 @@
 
         component && component.mount && component.mount();
       }
+      pos++;
     }
 
     if (originalPos == null) {
       var traverse = parent.childNodes[pos];
 
       while (traverse) {
+        var next = traverse.nextSibling;
+
         component && component.unmount && component.unmount();
         notifyUnmount(traverse);
         parent.removeChild(traverse);
@@ -144,6 +151,7 @@
     var traverse = child.firstChild;
 
     while (traverse) {
+      var next = traverse.nextSibling;
       var el = traverse.el;
       var component = el && el.component;
 

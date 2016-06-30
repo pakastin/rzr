@@ -3,7 +3,7 @@ import { parse, parseSVG, diff } from './index';
 
 export var render = (parent, el, pos) => {
   var originalPos = pos;
-  pos = pos || 0;
+  var pos = pos || 0;
   var oldNode = parent.childNodes[pos];
   var oldEl = oldNode && oldNode.el
 
@@ -19,7 +19,8 @@ export var render = (parent, el, pos) => {
       el = oldComponent.render(attrs, ...children);
       el.component = oldComponent;
       el.componentClass = oldComponentClass;
-      render(parent, el, pos++);
+
+      return render(parent, el, pos++);
     } else {
       var componentClass = el.tagName;
       var component = new componentClass();
@@ -32,20 +33,23 @@ export var render = (parent, el, pos) => {
 
       component.isMounted = false;
 
-      render(parent, el, pos++);
+      return render(parent, el, pos++);
     }
   } else if (el instanceof Array) {
     for (var i = 0; i < el.length; i++) {
       render(parent, el[i], pos++);
     }
+    return
   } else if (el instanceof Node) {
     if (oldNode) {
       parent.insertBefore(newNode, oldNode);
     } else {
       parent.appendChild(newNode);
     }
+    pos++;
   } else if (typeof el === 'string' || typeof el === 'number') {
     parent.textContent = el;
+    pos++;
   } else {
     var isSVG = (el.tagName === 'svg' || parent instanceof SVGElement);
 
@@ -66,7 +70,7 @@ export var render = (parent, el, pos) => {
         parent.appendChild(newNode);
       }
 
-      if (component && component.isMounted) {
+      if (component && !component.isMounted) {
         component.dom = newNode;
         component.init && component.init(attrs, ...children);
         component.isMounted = true;
@@ -74,12 +78,15 @@ export var render = (parent, el, pos) => {
 
       component && component.mount && component.mount();
     }
+    pos++;
   }
 
   if (originalPos == null) {
     var traverse = parent.childNodes[pos];
 
     while (traverse) {
+      var next = traverse.nextSibling;
+
       component && component.unmount && component.unmount();
       notifyUnmount(traverse);
       parent.removeChild(traverse);
@@ -93,6 +100,7 @@ function notifyUnmount (child) {
   var traverse = child.firstChild;
 
   while (traverse) {
+    var next = traverse.nextSibling;
     var el = traverse.el;
     var component = el && el.component;
 
