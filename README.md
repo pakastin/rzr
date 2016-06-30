@@ -1,4 +1,4 @@
-# rzr
+# RZR
 Turboboosted 2 KB virtual dom view library for browser &amp; node.js
 
 ## Installation
@@ -9,6 +9,9 @@ npm install pakastin/rzr
 
 ## Configuration
 Change JSX pragma to `el` and remember to `import { el } from 'rzr'` every time you use JSX.
+
+## Example project
+https://github.com/pakastin/rzr-example
 
 ## Usage
 
