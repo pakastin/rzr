@@ -1,6 +1,12 @@
 # rzr
 Turboboosted 2 KB virtual dom view library for browser &amp; node.js
 
+## Installation
+This is an early beta, for now install straight from Github:
+```js
+npm install pakastin/rzr
+```
+
 ## Configuration
 Change JSX pragma to `el` and remember to `import { el } from 'rzr'` every time you use JSX.
 
