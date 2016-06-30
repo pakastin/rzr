@@ -1,9 +1,8 @@
 
 import { parse, parseSVG, diff } from './index';
 
-export function render (parent, el, pos) {
-  var originalPos = pos;
-  var pos = pos || 0;
+export function render (parent, el, originalPos) {
+  var pos = originalPos || 0;
   var oldNode = parent.childNodes[pos];
   var oldEl = oldNode && oldNode.el
 
@@ -30,8 +29,6 @@ export function render (parent, el, pos) {
       el = component.render(attrs, ...children);
       el.component = component;
       el.componentClass = componentClass;
-
-      component.isMounted = false;
 
       return render(parent, el, pos);
     }
@@ -69,15 +66,14 @@ export function render (parent, el, pos) {
         parent.appendChild(newNode);
       }
 
-      if (component && !component.isMounted) {
+      if (component) {
         component.dom = newNode;
         component.init && component.init(attrs, ...children);
-        component.isMounted = true;
+      }
 
-        if (originalPos == null) {
-          component && component.mount && component.mount();
-          notifyDown(traverse, 'mount');
-        }
+      if (parent.parentNode) {
+        component && component.mount && component.mount();
+        notifyDown(newNode, 'mount');
       }
     }
     pos++;
@@ -108,7 +104,7 @@ function notifyDown (child, eventName) {
     var el = traverse.el;
     var component = el && el.component;
 
-    component && component[eventName]();
+    component && component[eventName] && component[eventName]();
     notifyDown(traverse, eventName);
 
     traverse = next;

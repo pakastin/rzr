@@ -288,9 +288,8 @@
     return node;
   }
 
-  function render (parent, el, pos) {
-    var originalPos = pos;
-    var pos = pos || 0;
+  function render (parent, el, originalPos) {
+    var pos = originalPos || 0;
     var oldNode = parent.childNodes[pos];
     var oldEl = oldNode && oldNode.el
 
@@ -317,8 +316,6 @@
         el = component.render.apply(component, [ attrs ].concat( children ));
         el.component = component;
         el.componentClass = componentClass;
-
-        component.isMounted = false;
 
         return render(parent, el, pos);
       }
@@ -356,15 +353,14 @@
           parent.appendChild(newNode);
         }
 
-        if (component && !component.isMounted) {
+        if (component) {
           component.dom = newNode;
           component.init && component.init.apply(component, [ attrs ].concat( children ));
-          component.isMounted = true;
+        }
 
-          if (originalPos == null) {
-            component && component.mount && component.mount();
-            notifyDown(traverse, 'mount');
-          }
+        if (parent.parentNode) {
+          component && component.mount && component.mount();
+          notifyDown(newNode, 'mount');
         }
       }
       pos++;
@@ -395,7 +391,7 @@
       var el = traverse.el;
       var component = el && el.component;
 
-      component && component[eventName]();
+      component && component[eventName] && component[eventName]();
       notifyDown(traverse, eventName);
 
       traverse = next;
