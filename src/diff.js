@@ -49,9 +49,7 @@ export function diff (parent, node, el) {
   if (typeof children === 'string' || typeof children === 'number') {
     node.textContent = children;
   } else if (children) {
-    for (var i = 0; i < children.length; i++) {
-      render(node, children[i], i);
-    }
+    render(node, children);
   } else {
     render(node, []);
   }

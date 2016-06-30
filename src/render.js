@@ -2,9 +2,9 @@
 import { parse, parseSVG, diff } from './index';
 
 export function render (parent, el, originalPos) {
-  var pos = originalPos || 0;
+  var pos = originalPos | pos;
   var oldNode = parent.childNodes[pos];
-  var oldEl = oldNode && oldNode.el
+  var oldEl = oldNode && oldNode.el;
 
   if (typeof el.tagName === 'function') {
     if (oldEl && oldEl.componentClass && el.tagName === oldEl.componentClass) {
@@ -19,7 +19,7 @@ export function render (parent, el, originalPos) {
       el.component = oldComponent;
       el.componentClass = oldComponentClass;
 
-      return render(parent, el, pos);
+      pos = render(parent, el, pos);
     } else {
       var componentClass = el.tagName;
       var component = new componentClass();
@@ -30,11 +30,11 @@ export function render (parent, el, originalPos) {
       el.component = component;
       el.componentClass = componentClass;
 
-      return render(parent, el, pos);
+      pos = render(parent, el, pos);
     }
   } else if (el instanceof Array) {
     for (var i = 0; i < el.length; i++) {
-      render(parent, el[i], pos++);
+      pos = render(parent, el[i], pos);
     }
   } else if (el instanceof Node) {
     if (oldNode) {
@@ -94,6 +94,7 @@ export function render (parent, el, originalPos) {
       traverse = next;
     }
   }
+  return pos;
 }
 
 function notifyDown (child, eventName) {

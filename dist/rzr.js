@@ -52,9 +52,7 @@
     if (typeof children === 'string' || typeof children === 'number') {
       node.textContent = children;
     } else if (children) {
-      for (var i = 0; i < children.length; i++) {
-        render(node, children[i], i);
-      }
+      render(node, children);
     } else {
       render(node, []);
     }
@@ -227,15 +225,7 @@
     if (typeof children === 'string' || typeof children === 'number') {
       node.textContent = children;
     } else if (children) {
-      for (var i = 0; i < children.length; i++) {
-        var child = children[i];
-
-        if (child instanceof Node) {
-          node.appendChild(child);
-        } else {
-          render(node, child, i);
-        }
-      }
+      render(node, children);
     }
 
     return node;
@@ -273,25 +263,15 @@
 
     var children = el.children;
 
-    for (var i = 0; i < children.length; i++) {
-      var child = children[i];
-
-      if (child instanceof Node) {
-        node.appendChild(child);
-      } else if (typeof child === 'string') {
-        node.appendChild(document.createTextNode(child));
-      } else {
-        render(node, child, i);
-      }
-    }
+    render(node, children);
 
     return node;
   }
 
   function render (parent, el, originalPos) {
-    var pos = originalPos || 0;
+    var pos = originalPos | pos;
     var oldNode = parent.childNodes[pos];
-    var oldEl = oldNode && oldNode.el
+    var oldEl = oldNode && oldNode.el;
 
     if (typeof el.tagName === 'function') {
       if (oldEl && oldEl.componentClass && el.tagName === oldEl.componentClass) {
@@ -306,7 +286,7 @@
         el.component = oldComponent;
         el.componentClass = oldComponentClass;
 
-        return render(parent, el, pos);
+        pos = render(parent, el, pos);
       } else {
         var componentClass = el.tagName;
         var component = new componentClass();
@@ -317,11 +297,11 @@
         el.component = component;
         el.componentClass = componentClass;
 
-        return render(parent, el, pos);
+        pos = render(parent, el, pos);
       }
     } else if (el instanceof Array) {
       for (var i = 0; i < el.length; i++) {
-        render(parent, el[i], pos++);
+        pos = render(parent, el[i], pos);
       }
     } else if (el instanceof Node) {
       if (oldNode) {
@@ -381,6 +361,7 @@
         traverse = next;
       }
     }
+    return pos;
   }
 
   function notifyDown (child, eventName) {
