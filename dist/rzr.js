@@ -195,7 +195,19 @@
     for (var key in attrs) {
       var value = attrs[key];
 
-      if (typeof value === 'function') {
+      if (typeof value === 'object') {
+        if (key === 'style') {
+          for (var key in value) {
+            node.style[key] = value[key];
+          }
+        } else if (key === 'class') {
+          for (var key in value) {
+            node.classList.add(key);
+          }
+        } else {
+          node[key] = value;
+        }
+      } else if (typeof value === 'function') {
         node[key] = value;
       } else {
         node.setAttribute(key, value);
@@ -304,10 +316,10 @@
           } else {
             node[key] = value;
           }
-        } else if (key === 'style' || (value == null && typeof value != 'function')) {
-          node.setAttribute(key, value);
-        } else {
+        } else if (typeof value == 'function') {
           node[key] = value;
+        } else {
+          node.setAttribute(key, value);
         }
       }
     }

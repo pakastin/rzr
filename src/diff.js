@@ -86,7 +86,7 @@ export var diffSVG = (parent, node, el) => {
         } else {
           node[key] = value;
         }
-      } else if (typeof value == 'function')) {
+      } else if (typeof value == 'function') {
         node[key] = value;
       } else {
         node.setAttribute(key, value);
