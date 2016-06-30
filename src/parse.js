@@ -1,7 +1,7 @@
 
 import { render } from './index';
 
-export var parse = (el) => {
+export function parse (el) {
   var node = document.createElement(el.tagName);
   var attrs = el.attrs;
 
@@ -49,7 +49,7 @@ export var parse = (el) => {
   return node;
 }
 
-export var parseSVG = (el) => {
+export function parseSVG (el) {
   var node = document.createElementNS('http://www.w3.org/2000/svg', el.tagName);
 
   node.el = el;

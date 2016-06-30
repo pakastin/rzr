@@ -1,7 +1,7 @@
 
 import { parse, parseSVG, diff } from './index';
 
-export var render = (parent, el, pos) => {
+export function render (parent, el, pos) {
   var originalPos = pos;
   var pos = pos || 0;
   var oldNode = parent.childNodes[pos];

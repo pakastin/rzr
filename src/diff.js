@@ -1,7 +1,7 @@
 
 import { render } from './index';
 
-export var diff = (parent, node, el) => {
+export function diff (parent, node, el) {
   var oldEl = node && node.el;
 
   var attrs = el.attrs;
@@ -55,7 +55,7 @@ export var diff = (parent, node, el) => {
   }
 }
 
-export var diffSVG = (parent, node, el) => {
+export diffSVG function (parent, node, el) {
   var oldEl = node && node.el;
 
   var attrs = el.attrs;

@@ -1,13 +1,15 @@
 
-export var el = (tagName, attrs, children) => {
+export function el (tagName, attrs, children) {
   for (var key in attrs) {
     if (key === 'style') {
       var value = attrs.style;
+
       if (typeof value === 'string') {
         attrs.style = parseStyleString(value);
       }
     } else if (key === 'class') {
       var value = attrs.class;
+
       if (typeof value === 'string') {
         attrs.class = parseClassString(value);
       }
@@ -21,7 +23,7 @@ export var el = (tagName, attrs, children) => {
   }
 }
 
-export var parseStyleString = (styleString) => {
+export function parseStyleString (styleString) {
   var split = styleString.split(';');
   var result = {};
 
@@ -33,7 +35,7 @@ export var parseStyleString = (styleString) => {
   return result;
 }
 
-export var parseClassString = (classString) => {
+export function parseClassString (classString) {
   var split = classString.split(' ');
   var result = {};
 
