@@ -16,7 +16,7 @@ https://github.com/pakastin/rzr-example
 ## Usage
 
 ```js
-import { el, render } from 'rzr';
+import { el, list, render } from 'rzr';
 
 class Li {
   render({ i }, ...children) {
@@ -49,7 +49,7 @@ update();
 
 function update () {
   render(document.body, <ul>
-    { data.map(i => <Li i={ i }></Li>) }
+    { list(Li, data) }
   </ul>);
   
   data.sort(() => Math.random() - 0.5);
