@@ -61,3 +61,6 @@ setTimeout(function () {
 ## State
 
 You can save state to components' `this`.
+
+## Non-virtual-dom version
+If you need mutability, check out [FRZR](https://frzr.js.org). You can also mix & match!
