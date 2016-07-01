@@ -51,7 +51,7 @@ function update () {
   var LEN = Math.random() * 25 + 25 | 0;
   
   render(document.body, <ul>
-    { list(Li, data.slice(0, LEN) }
+    { list(Li, data.slice(0, LEN)) }
   </ul>);
   
   data.sort(() => Math.random() - 0.5);
