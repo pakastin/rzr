@@ -304,12 +304,14 @@
         if (el[i] != null) pos = render(parent, el[i], pos);
       }
     } else if (el instanceof Node) {
-      if (oldNode) {
-        parent.insertBefore(newNode, oldNode);
-      } else {
-        parent.appendChild(newNode);
+      if (node !== oldNode) {
+        if (oldNode) {
+          parent.insertBefore(newNode, oldNode);
+        } else {
+          parent.appendChild(newNode);
+        }
+        pos++;
       }
-      pos++;
     } else if (typeof el === 'string' || typeof el === 'number') {
       parent.textContent = el;
       pos++;
