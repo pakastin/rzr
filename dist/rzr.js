@@ -304,7 +304,7 @@
         if (el[i] != null) pos = render(parent, el[i], pos);
       }
     } else if (el instanceof Node) {
-      if (node !== oldNode) {
+      if (newNode !== oldNode) {
         if (oldNode) {
           parent.insertBefore(newNode, oldNode);
         } else {
