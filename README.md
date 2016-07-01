@@ -45,17 +45,18 @@ for (var i = 0; i < data.length; i++) {
   data[i] = i;
 }
 
-render(document.body, <ul>
-  { data.map(item => <Li i={ i }></Li>) }
-</ul>);
+update();
 
-setTimeout(function () {
+function update () {
+  render(document.body, <ul>
+    { data.map(i => <Li i={ i }></Li>) }
+  </ul>);
+  
   data.sort(() => Math.random() - 0.5);
 
-  render(document.body, <ul>
-    { data.map(item => <Li i={ i }></Li>) }
-  </ul>);
-}, 1000);
+  setTimeout(update, 1000);
+}
+
 ```
 
 ## State
