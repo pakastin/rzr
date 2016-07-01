@@ -19,8 +19,8 @@ https://github.com/pakastin/rzr-example
 import { el, render } from 'rzr';
 
 class Li {
-  render(data, ...children) {
-    return <li class="item" onclick={ this.onClick.bind(this) }>{ data.i }</li>
+  render({ i }, ...children) {
+    return <li class="item" onclick={ this.onClick.bind(this) }>{ i }</li>
   }
   init(data, ...children) {
     console.log('created', this.dom);
