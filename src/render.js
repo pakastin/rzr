@@ -34,7 +34,7 @@ export function render (parent, el, originalPos) {
     }
   } else if (el instanceof Array) {
     for (var i = 0; i < el.length; i++) {
-      pos = render(parent, el[i], pos);
+      if (el[i]) pos = render(parent, el[i], pos);
     }
   } else if (el instanceof Node) {
     if (oldNode) {
