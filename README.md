@@ -39,17 +39,19 @@ class Li {
   }
 }
 
-var data = new Array(1000);
+var data = new Array(50);
 
 for (var i = 0; i < data.length; i++) {
-  data[i] = i;
+  data[i] = { i };
 }
 
 update();
 
 function update () {
+  var LEN = Math.random() * 25 + 25 | 0;
+  
   render(document.body, <ul>
-    { list(Li, data) }
+    { list(Li, data.slice(0, LEN) }
   </ul>);
   
   data.sort(() => Math.random() - 0.5);
