@@ -7,6 +7,10 @@ export function render (parent, el, originalPos) {
   var oldEl = oldNode && oldNode.el;
 
   if (typeof el.tagName === 'function') {
+    var key = el.attrs.key;
+    if (key != null) {
+      oldEl = parent.childLookup && parent.childLookup[key];
+    }
     if (oldEl && oldEl.componentClass && el.tagName === oldEl.componentClass) {
       var attrs = el.attrs;
       var children = el.children;
@@ -19,6 +23,19 @@ export function render (parent, el, originalPos) {
       el.component = oldComponent;
       el.componentClass = oldComponentClass;
 
+      if (key != null) {
+        parent.childLookup || (parent.childLookup = {});
+        parent.childLookup[key] = el;
+
+        if (oldEl && oldEl.dom) {
+          if (oldNode) {
+            parent.insertBefore(oldEl.dom, oldNode);
+          } else {
+            parent.appendChild(oldEl.dom);
+          }
+        }
+      }
+
       pos = render(parent, el, pos);
     } else {
       var componentClass = el.tagName;
@@ -29,6 +46,12 @@ export function render (parent, el, originalPos) {
       el = component.render(attrs, ...children);
       el.component = component;
       el.componentClass = componentClass;
+
+      if (key != null) {
+        parent.childLookup || (parent.childLookup = {});
+        parent.childLookup[key] = el;
+        el.key = key;
+      }
 
       pos = render(parent, el, pos);
     }
@@ -46,9 +69,18 @@ export function render (parent, el, originalPos) {
     }
     pos++;
   } else if (typeof el === 'string' || typeof el === 'number' || el instanceof Date) {
-    pos = render(parent, document.createTextNode(el), pos);
+    var str = String(el);
+    if (!oldNode || oldNode.textContent !== str) {
+      pos = render(parent, document.createTextNode(str), pos);
+    } else {
+      pos++;
+    }
   } else {
     var isSVG = (el.tagName === 'svg' || parent instanceof SVGElement);
+
+    if (el.key != null) {
+      oldEl = parent.childLookup && parent.childLookup[oldEl];
+    }
 
     if (oldEl && el.tagName === oldEl.tagName && el.componentClass === oldEl.componentClass) {
       if (isSVG) {

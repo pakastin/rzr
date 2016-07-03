@@ -6,6 +6,7 @@
   "main": "dist/rzr.js",
   "scripts": {
     "dev": "node watch",
+    "dist": "gh-pages -d dist",
     "build": "rollup -c -n rzr -f umd src/index.js -o dist/rzr.js",
     "uglify": "uglifyjs dist/rzr.js -cmo dist/rzr.min.js",
     "test": "rollup -c -f cjs src/index.js -o test/rzr.js && tape test"

@@ -191,11 +191,15 @@
     return result.join('');
   }
 
-  function list (Component, data) {
+  function list (Component, data, key) {
     var results = new Array(data.length);
 
     for (var i = 0; i < results.length; i++) {
-      results[i] = el(Component, data[i]);
+      if (key) {
+        results[i] = el(Component, Object.assign({}, data[i], {key: data[key]}));
+      } else {
+        results[i] = el(Component, data[i]);
+      }
     }
 
     return results;
