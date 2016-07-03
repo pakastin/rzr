@@ -1,8 +1,8 @@
 
-import { parse, parseSVG, diff } from './index';
+import { diff, diffSVG } from './index';
 
 export function render (parent, el, originalPos) {
-  var pos = originalPos | pos;
+  var pos = originalPos || 0;
   var oldNode = parent.childNodes[pos];
   var oldEl = oldNode && oldNode.el;
 
@@ -41,13 +41,12 @@ export function render (parent, el, originalPos) {
       if (oldNode) {
         parent.insertBefore(el, oldNode);
       } else {
-        parent.appendChild(newNode);
+        parent.appendChild(el);
       }
-      pos++;
     }
-  } else if (typeof el === 'string' || typeof el === 'number') {
-    parent.textContent = el;
     pos++;
+  } else if (typeof el === 'string' || typeof el === 'number') {
+    pos = render(parent, document.createTextNode(el), pos);
   } else {
     var isSVG = (el.tagName === 'svg' || parent instanceof SVGElement);
 
@@ -58,8 +57,8 @@ export function render (parent, el, originalPos) {
         diff(parent, oldNode, el);
       }
     } else {
-      var newNode = isSVG ? parseSVG(el) : parse(el);
-      var el = newNode.el;
+      var newNode = isSVG ? document.createElementNS('http://www.w3.org/2000/svg', el.tagName) : document.createElement(el.tagName);
+      isSVG ? diffSVG(parent, newNode, el) : diff(parent, newNode, el);
       var component = el && el.component;
 
       if (oldNode) {

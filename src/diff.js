@@ -2,10 +2,10 @@
 import { render } from './index';
 
 export function diff (parent, node, el) {
-  var oldEl = node && node.el;
+  var oldEl = (node && node.el) || {};
 
   var attrs = el.attrs;
-  var oldAttrs = oldEl.attrs;
+  var oldAttrs = oldEl.attrs || {};
 
   var children = el.children;
 
@@ -56,10 +56,10 @@ export function diff (parent, node, el) {
 }
 
 export function diffSVG (parent, node, el) {
-  var oldEl = node && node.el;
+  var oldEl = (node && node.el) || {};
 
   var attrs = el.attrs;
-  var oldAttrs = oldEl.attrs;
+  var oldAttrs = oldEl.attrs || {};
 
   var children = el.children;
 

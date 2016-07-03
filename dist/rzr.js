@@ -5,10 +5,10 @@
 }(this, function (exports) { 'use strict';
 
   function diff (parent, node, el) {
-    var oldEl = node && node.el;
+    var oldEl = (node && node.el) || {};
 
     var attrs = el.attrs;
-    var oldAttrs = oldEl.attrs;
+    var oldAttrs = oldEl.attrs || {};
 
     var children = el.children;
 
@@ -58,11 +58,11 @@
     }
   }
 
-  function diffSVG$1 (parent, node, el) {
-    var oldEl = node && node.el;
+  function diffSVG (parent, node, el) {
+    var oldEl = (node && node.el) || {};
 
     var attrs = el.attrs;
-    var oldAttrs = oldEl.attrs;
+    var oldAttrs = oldEl.attrs || {};
 
     var children = el.children;
 
@@ -191,85 +191,8 @@
     return results;
   }
 
-  function parse (el) {
-    var node = document.createElement(el.tagName);
-    var attrs = el.attrs;
-
-    node.el = el;
-    el.dom = node;
-
-    for (var key in attrs) {
-      var value = attrs[key];
-
-      if (typeof value === 'object') {
-        if (key === 'style') {
-          for (var key in value) {
-            node.style[key] = value[key];
-          }
-        } else if (key === 'class') {
-          for (var key in value) {
-            node.classList.add(key);
-          }
-        } else {
-          node[key] = value;
-        }
-      } else if (key === 'style' || (value == null && typeof value != 'function')) {
-        node.setAttribute(key, value);
-      } else {
-        node[key] = value;
-      }
-    }
-
-    var children = el.children;
-
-    if (typeof children === 'string' || typeof children === 'number') {
-      node.textContent = children;
-    } else if (children) {
-      render(node, children);
-    }
-
-    return node;
-  }
-
-  function parseSVG (el) {
-    var node = document.createElementNS('http://www.w3.org/2000/svg', el.tagName);
-
-    node.el = el;
-    el.dom = node;
-
-    var attrs = el.attrs;
-
-    for (var key in attrs) {
-      var value = attrs[key];
-
-      if (typeof value === 'object') {
-        if (key === 'style') {
-          for (var key in value) {
-            node.style[key] = value[key];
-          }
-        } else if (key === 'class') {
-          for (var key in value) {
-            node.classList.add(key);
-          }
-        } else {
-          node[key] = value;
-        }
-      } else if (typeof value === 'function') {
-        node[key] = value;
-      } else {
-        node.setAttribute(key, value);
-      }
-    }
-
-    var children = el.children;
-
-    render(node, children);
-
-    return node;
-  }
-
   function render (parent, el, originalPos) {
-    var pos = originalPos | pos;
+    var pos = originalPos || 0;
     var oldNode = parent.childNodes[pos];
     var oldEl = oldNode && oldNode.el;
 
@@ -308,13 +231,12 @@
         if (oldNode) {
           parent.insertBefore(el, oldNode);
         } else {
-          parent.appendChild(newNode);
+          parent.appendChild(el);
         }
-        pos++;
       }
-    } else if (typeof el === 'string' || typeof el === 'number') {
-      parent.textContent = el;
       pos++;
+    } else if (typeof el === 'string' || typeof el === 'number') {
+      pos = render(parent, document.createTextNode(el), pos);
     } else {
       var isSVG = (el.tagName === 'svg' || parent instanceof SVGElement);
 
@@ -325,8 +247,8 @@
           diff(parent, oldNode, el);
         }
       } else {
-        var newNode = isSVG ? parseSVG(el) : parse(el);
-        var el = newNode.el;
+        var newNode = isSVG ? document.createElementNS('http://www.w3.org/2000/svg', el.tagName) : document.createElement(el.tagName);
+        isSVG ? diffSVG(parent, newNode, el) : diff(parent, newNode, el);
         var component = el && el.component;
 
         if (oldNode) {
@@ -382,13 +304,11 @@
   }
 
   exports.diff = diff;
-  exports.diffSVG = diffSVG$1;
+  exports.diffSVG = diffSVG;
   exports.el = el;
   exports.parseStyleString = parseStyleString;
   exports.parseClassString = parseClassString;
   exports.list = list;
-  exports.parse = parse;
-  exports.parseSVG = parseSVG;
   exports.render = render;
 
   Object.defineProperty(exports, '__esModule', { value: true });
