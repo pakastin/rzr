@@ -213,7 +213,7 @@
     var oldEl = oldNode && oldNode.el;
     var childLookup = parent.childLookup;
 
-    if (typeof el.tagName === 'function') {
+    if (el && typeof el.tagName === 'function') {
       var key = el.attrs.key;
       if (key != null) {
         oldEl = childLookup && childLookup[key];
@@ -231,8 +231,6 @@
         el.componentClass = oldComponentClass;
 
         if (key != null) {
-          childLookup || (childLookup = parent.childLookup = {});
-          childLookup[key] = el;
           el.key = key;
 
           if (oldEl && oldEl.dom) {
@@ -256,8 +254,6 @@
         el.componentClass = componentClass;
 
         if (key != null) {
-          childLookup || (childLookup = parent.childLookup = {});
-          childLookup[key] = el;
           el.key = key;
         }
 
@@ -285,12 +281,14 @@
       }
     } else {
       var isSVG = (el.tagName === 'svg' || parent instanceof SVGElement);
+      var currentNode = oldNode;
 
       if (el.key != null) {
-        oldEl = childLookup && childLookup[oldEl];
+        oldEl = childLookup && childLookup[el.key];
+        oldNode = oldEl && oldEl.dom;
       }
 
-      if (oldEl && el.tagName === oldEl.tagName && el.componentClass === oldEl.componentClass) {
+      if (oldEl && oldNode && el.tagName === oldEl.tagName && el.componentClass === oldEl.componentClass) {
         if (isSVG) {
           diffSVG(parent, oldNode, el);
         } else {
@@ -305,8 +303,8 @@
         el.dom = newNode;
         var component = el && el.component;
 
-        if (oldNode) {
-          parent.insertBefore(newNode, oldNode);
+        if (currentNode) {
+          parent.insertBefore(newNode, currentNode);
         } else {
           parent.appendChild(newNode);
         }
@@ -320,6 +318,10 @@
           component && component.mount && component.mount();
           notifyDown(newNode, 'mount');
         }
+      }
+      if (el.key != null) {
+        childLookup || (childLookup = parent.childLookup = {});
+        childLookup[el.key] = el;
       }
       pos++;
     }
