@@ -17,7 +17,9 @@ export function diff (parent, node, el) {
       if (typeof value === 'object') {
         if (attr === 'style') {
           for (var key in value) {
-            node.style[key] = value[key];
+            if (value[key] !== (oldValue && oldValue[key])) {
+              node.style[key] = value[key];
+            }
           }
           for (var key in oldValue) {
             if (value[key] == null) {
@@ -26,13 +28,21 @@ export function diff (parent, node, el) {
           }
         } else if (attr === 'class') {
           for (var key in value) {
-            if (value == true) {
-              node.classList.add(key);
+            if (key) {
+              if (value[key] !== (oldValue && oldValue[key])) {
+                if (value[key]) {
+                  node.classList.add(key);
+                } else {
+                  node.classList.remove(key);
+                }
+              }
             }
           }
           for (var key in oldValue) {
-            if (value[key] == null) {
-              node.classList.remove(key);
+            if (key) {
+              if (value[key] == null) {
+                node.classList.remove(key);
+              }
             }
           }
         } else {

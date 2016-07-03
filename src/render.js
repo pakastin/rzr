@@ -56,9 +56,13 @@ export function render (parent, el, originalPos) {
       } else {
         diff(parent, oldNode, el);
       }
+      oldNode.el = el;
+      el.dom = oldNode;
     } else {
       var newNode = isSVG ? document.createElementNS('http://www.w3.org/2000/svg', el.tagName) : document.createElement(el.tagName);
       isSVG ? diffSVG(parent, newNode, el) : diff(parent, newNode, el);
+      newNode.el = el;
+      el.dom = newNode;
       var component = el && el.component;
 
       if (oldNode) {
