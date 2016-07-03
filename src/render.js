@@ -7,7 +7,7 @@ export function render (parent, el, originalPos) {
   var oldEl = oldNode && oldNode.el;
   var childLookup = parent.childLookup;
 
-  if (typeof el.tagName === 'function') {
+  if (el && typeof el.tagName === 'function') {
     var key = el.attrs.key;
     if (key != null) {
       oldEl = childLookup && childLookup[key];
@@ -25,8 +25,6 @@ export function render (parent, el, originalPos) {
       el.componentClass = oldComponentClass;
 
       if (key != null) {
-        childLookup || (childLookup = parent.childLookup = {});
-        childLookup[key] = el;
         el.key = key;
 
         if (oldEl && oldEl.dom) {
@@ -50,8 +48,6 @@ export function render (parent, el, originalPos) {
       el.componentClass = componentClass;
 
       if (key != null) {
-        childLookup || (childLookup = parent.childLookup = {});
-        childLookup[key] = el;
         el.key = key;
       }
 
@@ -79,9 +75,11 @@ export function render (parent, el, originalPos) {
     }
   } else {
     var isSVG = (el.tagName === 'svg' || parent instanceof SVGElement);
+    var currentNode = oldNode;
 
     if (el.key != null) {
       oldEl = childLookup && childLookup[el.key];
+      oldNode = oldEl && oldEl.dom;
     }
 
     if (oldEl && oldNode && el.tagName === oldEl.tagName && el.componentClass === oldEl.componentClass) {
@@ -99,8 +97,8 @@ export function render (parent, el, originalPos) {
       el.dom = newNode;
       var component = el && el.component;
 
-      if (oldNode) {
-        parent.insertBefore(newNode, oldNode);
+      if (currentNode) {
+        parent.insertBefore(newNode, currentNode);
       } else {
         parent.appendChild(newNode);
       }
@@ -114,6 +112,10 @@ export function render (parent, el, originalPos) {
         component && component.mount && component.mount();
         notifyDown(newNode, 'mount');
       }
+    }
+    if (el.key != null) {
+      childLookup || (childLookup = parent.childLookup = {});
+      childLookup[el.key] = el;
     }
     pos++;
   }
