@@ -195,10 +195,12 @@
     var results = new Array(data.length);
 
     for (var i = 0; i < results.length; i++) {
+      var item = data[i];
+
       if (key) {
-        results[i] = el(Component, Object.assign({}, data[i], {key: data[key]}));
+        results[i] = el(Component, Object.assign({}, item, {key: item[key]}));
       } else {
-        results[i] = el(Component, data[i]);
+        results[i] = el(Component, item);
       }
     }
 
@@ -211,6 +213,10 @@
     var oldEl = oldNode && oldNode.el;
 
     if (typeof el.tagName === 'function') {
+      var key = el.attrs.key;
+      if (key != null) {
+        oldEl = parent.childLookup && parent.childLookup[key];
+      }
       if (oldEl && oldEl.componentClass && el.tagName === oldEl.componentClass) {
         var attrs = el.attrs;
         var children = el.children;
@@ -223,6 +229,19 @@
         el.component = oldComponent;
         el.componentClass = oldComponentClass;
 
+        if (key != null) {
+          parent.childLookup || (parent.childLookup = {});
+          parent.childLookup[key] = el;
+
+          if (oldEl && oldEl.dom) {
+            if (oldNode) {
+              parent.insertBefore(oldEl.dom, oldNode);
+            } else {
+              parent.appendChild(oldEl.dom);
+            }
+          }
+        }
+
         pos = render(parent, el, pos);
       } else {
         var componentClass = el.tagName;
@@ -233,6 +252,12 @@
         el = component.render.apply(component, [ attrs ].concat( children ));
         el.component = component;
         el.componentClass = componentClass;
+
+        if (key != null) {
+          parent.childLookup || (parent.childLookup = {});
+          parent.childLookup[key] = el;
+          el.key = key;
+        }
 
         pos = render(parent, el, pos);
       }
@@ -250,9 +275,18 @@
       }
       pos++;
     } else if (typeof el === 'string' || typeof el === 'number' || el instanceof Date) {
-      pos = render(parent, document.createTextNode(el), pos);
+      var str = String(el);
+      if (!oldNode || oldNode.textContent !== str) {
+        pos = render(parent, document.createTextNode(str), pos);
+      } else {
+        pos++;
+      }
     } else {
       var isSVG = (el.tagName === 'svg' || parent instanceof SVGElement);
+
+      if (el.key != null) {
+        oldEl = parent.childLookup && parent.childLookup[oldEl];
+      }
 
       if (oldEl && el.tagName === oldEl.tagName && el.componentClass === oldEl.componentClass) {
         if (isSVG) {
