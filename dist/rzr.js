@@ -287,10 +287,10 @@
       var isSVG = (el.tagName === 'svg' || parent instanceof SVGElement);
 
       if (el.key != null) {
-        oldEl = childLookup && childLookup[oldEl];
+        oldEl = childLookup && childLookup[el.key];
       }
 
-      if (oldEl && el.tagName === oldEl.tagName && el.componentClass === oldEl.componentClass) {
+      if (oldEl && oldNode && el.tagName === oldEl.tagName && el.componentClass === oldEl.componentClass) {
         if (isSVG) {
           diffSVG(parent, oldNode, el);
         } else {
