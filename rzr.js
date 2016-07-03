@@ -191,11 +191,17 @@
     return result.join('');
   }
 
-  function list (Component, data) {
+  function list (Component, data, key) {
     var results = new Array(data.length);
 
     for (var i = 0; i < results.length; i++) {
-      results[i] = el(Component, data[i]);
+      var item = data[i];
+
+      if (key) {
+        results[i] = el(Component, Object.assign({}, item, {key: item[key]}));
+      } else {
+        results[i] = el(Component, item);
+      }
     }
 
     return results;
@@ -205,8 +211,13 @@
     var pos = originalPos || 0;
     var oldNode = parent.childNodes[pos];
     var oldEl = oldNode && oldNode.el;
+    var childLookup = parent.childLookup;
 
     if (typeof el.tagName === 'function') {
+      var key = el.attrs.key;
+      if (key != null) {
+        oldEl = childLookup && childLookup[key];
+      }
       if (oldEl && oldEl.componentClass && el.tagName === oldEl.componentClass) {
         var attrs = el.attrs;
         var children = el.children;
@@ -219,6 +230,20 @@
         el.component = oldComponent;
         el.componentClass = oldComponentClass;
 
+        if (key != null) {
+          childLookup || (childLookup = parent.childLookup = {});
+          childLookup[key] = el;
+          el.key = key;
+
+          if (oldEl && oldEl.dom) {
+            if (oldNode) {
+              parent.insertBefore(oldEl.dom, oldNode);
+            } else {
+              parent.appendChild(oldEl.dom);
+            }
+          }
+        }
+
         pos = render(parent, el, pos);
       } else {
         var componentClass = el.tagName;
@@ -229,6 +254,12 @@
         el = component.render.apply(component, [ attrs ].concat( children ));
         el.component = component;
         el.componentClass = componentClass;
+
+        if (key != null) {
+          childLookup || (childLookup = parent.childLookup = {});
+          childLookup[key] = el;
+          el.key = key;
+        }
 
         pos = render(parent, el, pos);
       }
@@ -246,9 +277,18 @@
       }
       pos++;
     } else if (typeof el === 'string' || typeof el === 'number' || el instanceof Date) {
-      pos = render(parent, document.createTextNode(el), pos);
+      var str = String(el);
+      if (!oldNode || oldNode.textContent !== str) {
+        pos = render(parent, document.createTextNode(str), pos);
+      } else {
+        pos++;
+      }
     } else {
       var isSVG = (el.tagName === 'svg' || parent instanceof SVGElement);
+
+      if (el.key != null) {
+        oldEl = childLookup && childLookup[oldEl];
+      }
 
       if (oldEl && el.tagName === oldEl.tagName && el.componentClass === oldEl.componentClass) {
         if (isSVG) {
@@ -291,6 +331,11 @@
         var next = traverse.nextSibling;
         var el = traverse.el;
         var component = el && el.component;
+        var key = el && el.key;
+
+        if (key != null) {
+          childLookup && (childLookup[key] = null);
+        }
 
         component && component.unmount && component.unmount();
         notifyDown(traverse, 'unmount');
