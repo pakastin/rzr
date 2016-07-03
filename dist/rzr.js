@@ -235,7 +235,7 @@
         }
       }
       pos++;
-    } else if (typeof el === 'string' || typeof el === 'number') {
+    } else if (typeof el === 'string' || typeof el === 'number' || el instanceof Date) {
       pos = render(parent, document.createTextNode(el), pos);
     } else {
       var isSVG = (el.tagName === 'svg' || parent instanceof SVGElement);
