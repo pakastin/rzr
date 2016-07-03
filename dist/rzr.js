@@ -211,11 +211,12 @@
     var pos = originalPos || 0;
     var oldNode = parent.childNodes[pos];
     var oldEl = oldNode && oldNode.el;
+    var childLookup = parent.childLookup;
 
     if (typeof el.tagName === 'function') {
       var key = el.attrs.key;
       if (key != null) {
-        oldEl = parent.childLookup && parent.childLookup[key];
+        oldEl = childLookup && childLookup[key];
       }
       if (oldEl && oldEl.componentClass && el.tagName === oldEl.componentClass) {
         var attrs = el.attrs;
@@ -230,8 +231,9 @@
         el.componentClass = oldComponentClass;
 
         if (key != null) {
-          parent.childLookup || (parent.childLookup = {});
-          parent.childLookup[key] = el;
+          childLookup || (childLookup = parent.childLookup = {});
+          childLookup[key] = el;
+          el.key = key;
 
           if (oldEl && oldEl.dom) {
             if (oldNode) {
@@ -254,8 +256,8 @@
         el.componentClass = componentClass;
 
         if (key != null) {
-          parent.childLookup || (parent.childLookup = {});
-          parent.childLookup[key] = el;
+          childLookup || (childLookup = parent.childLookup = {});
+          childLookup[key] = el;
           el.key = key;
         }
 
@@ -285,7 +287,7 @@
       var isSVG = (el.tagName === 'svg' || parent instanceof SVGElement);
 
       if (el.key != null) {
-        oldEl = parent.childLookup && parent.childLookup[oldEl];
+        oldEl = childLookup && childLookup[oldEl];
       }
 
       if (oldEl && el.tagName === oldEl.tagName && el.componentClass === oldEl.componentClass) {
@@ -329,6 +331,11 @@
         var next = traverse.nextSibling;
         var el = traverse.el;
         var component = el && el.component;
+        var key = el && el.key;
+
+        if (key != null) {
+          childLookup && (childLookup[key] = null);
+        }
 
         component && component.unmount && component.unmount();
         notifyDown(traverse, 'unmount');
