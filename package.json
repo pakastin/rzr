@@ -1,6 +1,6 @@
 {
   "name": "rzr",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Turboboosted 2 KB virtual dom view library for browser & node.js",
   "jsnext:main": "src/index.js",
   "main": "dist/rzr.js",
